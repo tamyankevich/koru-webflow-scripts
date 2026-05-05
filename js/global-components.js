@@ -1,3 +1,14 @@
+// =============================================================
+// GLOBAL COMPONENTS
+// =============================================================
+// • initNewNav                — burger toggle open/close nav modal
+// • initNavLogoColor          — logo color updates based on scroll section
+// • initWordmarkAnim          — wordmark slides out on scroll, back at top
+// • animateWords              — reusable SplitText word reveal animation
+// • initSwiperSlider          — collective members swiper, slug-based init
+// • SLIDER CONTRAST (IIFE)    — heading color adapts to current slide
+// =============================================================
+
 //New Nav Animation
 function initNewNav() {
   const trigger = document.querySelector('[data-nav-trigger]');
@@ -35,7 +46,7 @@ function initNewNav() {
   function btnToPlus() {
     if (!hasLines) return;
     if (btnTl) btnTl.kill();
-    btnTl = gsap.timeline({ defaults: { duration: 0.25, ease: 'power2.inOut' } });
+    btnTl = gsap.timeline({ defaults: { duration: 0.4, ease: 'cubic-bezier(0.15, 0.5, 0.05, 1)' } });
     // top moves to center and rotates 90° (vertical bar of plus)
     btnTl.to(lineTop, { y: 5, rotation: 90 }, 0);
     // mid stays as horizontal bar
@@ -47,7 +58,7 @@ function initNewNav() {
   function btnToMinus() {
     if (!hasLines) return;
     if (btnTl) btnTl.kill();
-    btnTl = gsap.timeline({ defaults: { duration: 0.25, ease: 'power2.inOut' } });
+    btnTl = gsap.timeline({ defaults: { duration: 0.4, ease: 'cubic-bezier(0.15, 0.5, 0.05, 1)' } });
     // top fades out
     btnTl.to(lineTop, { autoAlpha: 0 }, 0);
     // mid stays centered as the minus
@@ -59,7 +70,7 @@ function initNewNav() {
   function btnToDefault() {
     if (!hasLines) return;
     if (btnTl) btnTl.kill();
-    btnTl = gsap.timeline({ defaults: { duration: 0.25, ease: 'power2.inOut' } });
+    btnTl = gsap.timeline({ defaults: { duration: 0.4, ease: 'cubic-bezier(0.15, 0.5, 0.05, 1)' } });
     btnTl.to(lineTop, { y: 0, rotation: 0, autoAlpha: 1 }, 0);
     btnTl.to(lineMid, { y: 0, rotation: 0, autoAlpha: 1 }, 0);
     btnTl.to(lineBot, { y: 0, autoAlpha: 1 }, 0);
@@ -117,6 +128,7 @@ function initNavLogoColor() {
 
   function update() {
     const color = getCurrentColor();
+    if (color === 'disabled') return;
     gsap.to(logo, { color, duration: 0.3, ease: 'power2.out', overwrite: true });
   }
 
@@ -131,11 +143,14 @@ function initWordmarkAnim() {
   const wrapper = document.querySelector('[data-anim-wordmark]');
   if (!wrapper) return;
 
-  const split = new SplitText(wrapper, { type: 'chars', specialChars: [' '] });
+  // Replace the space with a non-breaking space span so SplitText wraps it
+  wrapper.innerHTML = wrapper.textContent.replace(' ', '<span class="wordmark-space">&nbsp;</span>');
+
+  const split = new SplitText(wrapper, { type: 'chars' });
   const clipH = (wrapper.parentElement || wrapper).getBoundingClientRect().height;
 
-  // Set initial state
-  gsap.set(split.chars, { y: 0, autoAlpha: 1 });
+  // Ensure chars stay inline so the flex wrapper lays them out correctly
+  gsap.set(split.chars, { display: 'inline-block', y: 0, autoAlpha: 1 });
 
   let hidden = false;
   let tl = null;

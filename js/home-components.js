@@ -1,4 +1,20 @@
+// =============================================================
+// HOME COMPONENTS
+// =============================================================
+// • initCrispLoadingAnimation — hero loader sequence, images + heading reveal
+// • HERO ANIMATIONS (IIFE)    — cursor/scrubber drives featured work slideshow
+// • initStickyTitleScroll     — scroll-scrubbed sticky heading transitions
+// • initTabSystem             — pain point tabs with autoplay progress bar
+// • FCS INIT (DOMContentLoaded) — featured case study swipers + lightbox setup
+// • createLightbox            — reusable GSAP-powered image lightbox
+// • LOGOS LIST (DOMContentLoaded) — reorders logo items, color ones at even positions
+// =============================================================
+
 gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase)
+
+// Force scroll to top immediately, before any async delays
+window.scrollTo(0, 0);
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
 console.log("home-components script loaded")
 // -----------------------------------------
@@ -11,13 +27,29 @@ function initCrispLoadingAnimation() {
 
   const smallElements = document.querySelectorAll(".nav-logo__link, .nav-links__wrapper");
   const container = document.querySelector(".crisp-header");
+  const holder = document.querySelector(".clean-screen-holder");
+  const navOuter = document.querySelector(".nav-outer");
   const heading = container.querySelectorAll(".h1__hero");
   const revealImages = container.querySelectorAll(".crisp-loader__group > *");
   const isScaleUp = container.querySelectorAll(".crisp-loader__media");
   const isScaleDown = container.querySelectorAll(".crisp-loader__media .is--scale-down");
   const isRadius = container.querySelectorAll(".crisp-loader__media.is--scaling.is--radius");
-  
-  
+
+  // On small mobile, skip the loader entirely and reveal hero content immediately
+  if (window.innerWidth <= 480) {
+    window.scrollTo(0, 0);
+    container.classList.remove('is--hidden');
+    container.classList.remove('is--loading');
+    if (holder) gsap.set(holder, { autoAlpha: 0, display: 'none' });
+    if (navOuter) navOuter.classList.remove('is--init');
+    const fwHeading = container.querySelector('.h4__featured-work');
+    const fwTags    = container.querySelectorAll('.fw-tags__container > *');
+    if (heading.length) animateWords(heading);
+    if (fwHeading)  gsap.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out', delay: 0.1 });
+    if (fwTags.length) gsap.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06, delay: 0.15 });
+    return;
+  }
+
   /* GSAP Timeline */
   const tl = gsap.timeline({
     defaults: {
@@ -27,9 +59,13 @@ function initCrispLoadingAnimation() {
       window.scrollTo(0, 0);
       container.classList.remove('is--hidden');
       document.body.style.overflow = 'hidden';
+      // Fade out the placeholder cover and reveal the nav now that the hero animation is starting
+      if (holder) gsap.to(holder, { autoAlpha: 0, duration: 0.3, ease: 'power1.out' });
+      if (navOuter) navOuter.classList.remove('is--init');
     },
     onComplete: () => {
       document.body.style.overflow = '';
+      if (holder) gsap.set(holder, { display: 'none' });
     }
   });
   
@@ -130,7 +166,7 @@ function initCrispLoadingAnimation() {
   if (fwTitle) animateWords(fwTitle, tl, '-=1');
   if (fwMock)  tl.from(fwMock, { autoAlpha: 0, duration: 1, ease: 'power2.out' }, '<');
   if (fwInfo)  tl.from(fwInfo, { width: 0, duration: 1, ease: 'power2.inOut', overflow: 'hidden' }, '-=0.9');
-  if (fwHeading) animateWords(fwHeading, tl, '-=0.6');
+  if (fwHeading) tl.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out' }, '-=0.6');
   if (fwTags.length) {
     tl.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06 }, '-=0.6');
   }
@@ -202,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var currentImage   = -1;
     var clientSplit    = null;
 
-    function swap(projectIdx, imageIdx) {
+    function swap(projectIdx, imageIdx, silent) {
       var p = projects[projectIdx];
       if (!p) return;
 
@@ -210,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (slotClient) {
           if (clientSplit) { clientSplit.revert(); clientSplit = null; }
           slotClient.textContent = p.client;
-          clientSplit = animateWords(slotClient);
+          if (!silent) clientSplit = animateWords(slotClient);
         }
 
         if (slotTags) {
@@ -299,8 +335,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     heroUpdateScrubber = updateScrubber;
 
-    // Set initial state immediately
-    swap(0, 0);
+    // Set initial state immediately — silent so animateWords doesn't fire before the loader
+    swap(0, 0, true);
 
     if (!isMobileCheck) {
       updateScrubber(0);
@@ -371,6 +407,8 @@ document.addEventListener('DOMContentLoaded', function () {
       var lastT         = 0;
       var momentumTween = null;
 
+      scrubber.style.touchAction = 'pan-y';
+
       scrubber.addEventListener('touchstart', function (e) {
         scrubberW      = scrubber.clientWidth;
         dragStartX     = e.touches[0].clientX;
@@ -380,25 +418,22 @@ document.addEventListener('DOMContentLoaded', function () {
         lastX          = e.touches[0].clientX;
         lastT          = e.timeStamp;
         if (momentumTween) { momentumTween.kill(); momentumTween = null; }
-        document.body.style.overflowY = 'hidden';
       }, { passive: true });
 
       scrubber.addEventListener('touchmove', function (e) {
         if (!isDragging) return;
-        e.preventDefault();
         var now = e.timeStamp;
         var dt  = now - lastT;
-        if (dt > 0) velocity = (e.touches[0].clientX - lastX) / dt; // px/ms
+        if (dt > 0) velocity = (e.touches[0].clientX - lastX) / dt;
         lastX = e.touches[0].clientX;
         lastT = now;
         var dx = e.touches[0].clientX - dragStartX;
         ballX  = Math.max(0, Math.min(scrubberW, dragStartBallX + dx));
         applyMobileBallX(ballX);
-      }, { passive: false });
+      }, { passive: true });
 
       function endDrag() {
         isDragging = false;
-        document.body.style.overflowY = '';
 
         // Momentum: project forward based on velocity, decelerate over time
         var momentumDist = velocity * 180; // 180ms worth of travel — tune this
