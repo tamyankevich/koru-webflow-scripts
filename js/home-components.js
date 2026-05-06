@@ -10,7 +10,7 @@
 // • LOGOS LIST (DOMContentLoaded) — reorders logo items, color ones at even positions
 // =============================================================
 
-gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase)
+gsap.registerPlugin(CustomEase)
 
 // Force scroll to top immediately, before any async delays
 window.scrollTo(0, 0);

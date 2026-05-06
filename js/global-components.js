@@ -1,3 +1,5 @@
+gsap.registerPlugin(ScrollTrigger, SplitText)
+
 // =============================================================
 // GLOBAL COMPONENTS
 // =============================================================
@@ -7,6 +9,7 @@
 // • animateWords              — reusable SplitText word reveal animation
 // • initSwiperSlider          — collective members swiper, slug-based init
 // • SLIDER CONTRAST (IIFE)    — heading color adapts to current slide
+// • initNavCtaMobile          — hides nav CTA on <=480px until narrative-section
 // =============================================================
 
 //New Nav Animation
@@ -143,14 +146,25 @@ function initWordmarkAnim() {
   const wrapper = document.querySelector('[data-anim-wordmark]');
   if (!wrapper) return;
 
-  // Replace the space with a non-breaking space span so SplitText wraps it
-  wrapper.innerHTML = wrapper.textContent.replace(' ', '<span class="wordmark-space">&nbsp;</span>');
+  // Split the two words manually so the space is a standalone element SplitText never touches
+  const [wordA, wordB] = wrapper.textContent.trim().split(' ');
+  wrapper.innerHTML =
+    `<span class="wordmark-word">${wordA}</span>` +
+    `<span class="wordmark-space">&nbsp;</span>` +
+    `<span class="wordmark-word">${wordB}</span>`;
 
-  const split = new SplitText(wrapper, { type: 'chars' });
+  const spanA = wrapper.querySelectorAll('.wordmark-word')[0];
+  const spanB = wrapper.querySelectorAll('.wordmark-word')[1];
+  const space = wrapper.querySelector('.wordmark-space');
+
+  const splitA = new SplitText(spanA, { type: 'chars' });
+  const splitB = new SplitText(spanB, { type: 'chars' });
+  const allChars = [...splitA.chars, ...splitB.chars];
+
   const clipH = (wrapper.parentElement || wrapper).getBoundingClientRect().height;
 
-  // Ensure chars stay inline so the flex wrapper lays them out correctly
-  gsap.set(split.chars, { display: 'inline-block', y: 0, autoAlpha: 1 });
+  gsap.set(allChars, { display: 'inline-block', y: 0, autoAlpha: 1 });
+  gsap.set(space, { display: 'inline-block' });
 
   let hidden = false;
   let tl = null;
@@ -160,7 +174,7 @@ function initWordmarkAnim() {
     hidden = true;
     if (tl) tl.kill();
     tl = gsap.timeline();
-    tl.to(split.chars, {
+    tl.to([...allChars, space], {
       y: clipH,
       autoAlpha: 0,
       duration: 0.4,
@@ -174,7 +188,7 @@ function initWordmarkAnim() {
     hidden = false;
     if (tl) tl.kill();
     tl = gsap.timeline();
-    tl.to(split.chars, {
+    tl.to([...allChars, space], {
       y: 0,
       autoAlpha: 1,
       duration: 0.4,
@@ -356,3 +370,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 })();
+
+
+// -----------------------------------------
+// NAV CTA MOBILE REVEAL
+// -----------------------------------------
+function initNavCtaMobile() {
+  if (window.innerWidth > 480) return;
+
+  const cta     = document.querySelector('[data-is-nav-cta]');
+  const section = document.querySelector('#narrative-section');
+  if (!cta || !section) return;
+
+  const ease = 'cubic-bezier(0.15, 0.5, 0.05, 1)';
+
+  // Split CTA text into words and hide them below
+  const split = new SplitText(cta, { type: 'words', mask: 'words' });
+  gsap.set(split.words, { yPercent: 110 });
+  gsap.set(cta, { width: 0, autoAlpha: 0, overflow: 'hidden' });
+
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top top',
+    onEnter: () => {
+      const tl = gsap.timeline();
+      tl.to(cta, { width: 'auto', autoAlpha: 1, duration: 0.4, ease })
+        .to(split.words, { yPercent: 0, duration: 0.4, ease, stagger: 0.06 }, '-=0.1');
+    },
+    onLeaveBack: () => {
+      gsap.to(split.words, { yPercent: 110, duration: 0.25, ease });
+      gsap.to(cta, { width: 0, autoAlpha: 0, duration: 0.3, ease, delay: 0.1 });
+    },
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initNavCtaMobile);
