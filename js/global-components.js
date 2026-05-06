@@ -428,10 +428,7 @@ document.addEventListener('DOMContentLoaded', initNavCtaMobile);
 const BODY_COLOR_DEFAULT = '#e9f1ed';
 
 function initBodyColorSections() {
-  const sections = document.querySelectorAll('[data-body-color]');
-
-  gsap.set(document.body, { backgroundColor: BODY_COLOR_DEFAULT });
-
+  const sections = document.querySelectorAll('section, [data-body-color]');
   if (!sections.length) return;
 
   sections.forEach(section => {
