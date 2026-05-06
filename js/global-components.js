@@ -10,6 +10,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText)
 // • initSwiperSlider          — collective members swiper, slug-based init
 // • SLIDER CONTRAST (IIFE)    — heading color adapts to current slide
 // • initNavCtaMobile          — hides nav CTA on <=480px until narrative-section
+// • initBodyColorSections     — transitions body bg color when data-body-color section hits viewport midpoint
 // =============================================================
 
 //New Nav Animation
@@ -419,3 +420,31 @@ function initNavCtaMobile() {
 }
 
 document.addEventListener('DOMContentLoaded', initNavCtaMobile);
+
+
+// -----------------------------------------
+// BODY COLOR SECTIONS
+// -----------------------------------------
+const BODY_COLOR_DEFAULT = '#e9f1ed';
+
+function initBodyColorSections() {
+  const sections = document.querySelectorAll('[data-body-color]');
+
+  gsap.set(document.body, { backgroundColor: BODY_COLOR_DEFAULT });
+
+  if (!sections.length) return;
+
+  sections.forEach(section => {
+    const color = section.dataset.bodyColor || BODY_COLOR_DEFAULT;
+
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top 50%',
+      end: 'bottom 50%',
+      onEnter: () => gsap.to(document.body, { backgroundColor: color, duration: 0.6, ease: 'power2.out' }),
+      onEnterBack: () => gsap.to(document.body, { backgroundColor: color, duration: 0.6, ease: 'power2.out' }),
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initBodyColorSections);
