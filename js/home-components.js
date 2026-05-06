@@ -166,9 +166,9 @@ function initCrispLoadingAnimation() {
   if (fwTitle) animateWords(fwTitle, tl, '-=1');
   if (fwMock)  tl.from(fwMock, { autoAlpha: 0, duration: 1, ease: 'power2.out' }, '<');
   if (fwInfo)  tl.from(fwInfo, { width: 0, duration: 1, ease: 'power2.inOut', overflow: 'hidden' }, '-=0.9');
-  if (fwHeading) tl.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out' }, '-=0.6');
+  if (fwHeading) tl.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out', clearProps: 'all' }, '-=0.6');
   if (fwTags.length) {
-    tl.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06 }, '-=0.6');
+    tl.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06, clearProps: 'all' }, '-=0.6');
   }
 
   

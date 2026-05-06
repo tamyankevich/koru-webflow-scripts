@@ -147,7 +147,9 @@ function initWordmarkAnim() {
   if (!wrapper) return;
 
   // Split the two words manually so the space is a standalone element SplitText never touches
-  const [wordA, wordB] = wrapper.textContent.trim().split(' ');
+  const words = wrapper.textContent.trim().split(/\s+/);
+  const wordA = words[0] || '';
+  const wordB = words[1] || '';
   wrapper.innerHTML =
     `<span class="wordmark-word">${wordA}</span>` +
     `<span class="wordmark-space">&nbsp;</span>` +
@@ -169,10 +171,14 @@ function initWordmarkAnim() {
   let hidden = false;
   let tl = null;
 
-  function hideWordmark() {
+  function hideWordmark(instant) {
     if (hidden) return;
     hidden = true;
     if (tl) tl.kill();
+    if (instant) {
+      gsap.set([...allChars, space], { y: clipH, autoAlpha: 0 });
+      return;
+    }
     tl = gsap.timeline();
     tl.to([...allChars, space], {
       y: clipH,
@@ -183,10 +189,14 @@ function initWordmarkAnim() {
     });
   }
 
-  function showWordmark() {
+  function showWordmark(instant) {
     if (!hidden) return;
     hidden = false;
     if (tl) tl.kill();
+    if (instant) {
+      gsap.set([...allChars, space], { y: 0, autoAlpha: 1 });
+      return;
+    }
     tl = gsap.timeline();
     tl.to([...allChars, space], {
       y: 0,
@@ -196,6 +206,9 @@ function initWordmarkAnim() {
       stagger: { each: 0.025, from: 'start' }
     });
   }
+
+  // Set initial state instantly based on current scroll position
+  if (window.scrollY > 0) hideWordmark(true);
 
   window.addEventListener('scroll', () => {
     if (window.scrollY > 0) hideWordmark();
@@ -221,7 +234,7 @@ function animateWords(elements, tl, position) {
   if (!targets || (targets.length !== undefined && !targets.length)) return null;
 
   const split = new SplitText(targets, { type: 'words', mask: 'words' });
-  gsap.set(split.words, { yPercent: 110 });
+  gsap.set(split.words, { yPercent: 110, lineHeight: 'inherit' });
 
   const tweenVars = {
     yPercent: 0,
@@ -384,8 +397,9 @@ function initNavCtaMobile() {
 
   const ease = 'cubic-bezier(0.15, 0.5, 0.05, 1)';
 
-  // Split CTA text into words and hide them below
-  const split = new SplitText(cta, { type: 'words', mask: 'words' });
+  // Split only the visible text element, not the whole wrapper (which includes a sr-only link)
+  const ctaText = cta.querySelector('.btn-text') || cta;
+  const split = new SplitText(ctaText, { type: 'words', mask: 'words' });
   gsap.set(split.words, { yPercent: 110 });
   gsap.set(cta, { width: 0, autoAlpha: 0, overflow: 'hidden' });
 
