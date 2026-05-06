@@ -393,7 +393,7 @@ function initNavCtaMobile() {
   if (window.innerWidth > 480) return;
 
   const cta     = document.querySelector('[data-is-nav-cta]');
-  const section = document.querySelectorAll('section')[1];
+  const section = document.querySelector('.page-main')?.querySelectorAll('section')[1];
   if (!cta || !section) return;
 
   const ease = 'cubic-bezier(0.15, 0.5, 0.05, 1)';
