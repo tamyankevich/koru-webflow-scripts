@@ -282,6 +282,7 @@ function initSwiperSlider() {
       grabCursor: true,
       centeredSlides: true,
       loop: true,
+      touchStartPreventDefault: false,
       breakpoints: {
         320: {
           slidesPerView: 1.5,

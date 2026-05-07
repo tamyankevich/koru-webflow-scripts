@@ -697,6 +697,7 @@ document.addEventListener('DOMContentLoaded', function () {
       slidesPerView: 'auto',
       observer: true,
       observeParents: true,
+      touchStartPreventDefault: false,
       navigation: {
         nextEl: item.querySelector('[data-fcs-next]'),
         prevEl: item.querySelector('[data-fcs-prev]'),
