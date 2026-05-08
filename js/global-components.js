@@ -280,7 +280,7 @@ function initSwiperSlider() {
       speed: 600,
       mousewheel: false,
       grabCursor: true,
-      centeredSlides: true,
+      centeredSlides: false,
       loop: true,
       touchStartPreventDefault: false,
       breakpoints: {
@@ -296,11 +296,13 @@ function initSwiperSlider() {
         },
         568: {
           slidesPerView: 3,
-          centeredSlides: true,
-          initialSlide: resolvedIndex,
+          centeredSlides: false,
+          initialSlide: matchIndex !== -1 ? matchIndex : 0,
         },
         992: {
+          centeredSlides: true,
           slidesPerView: 7,
+          initialSlide: resolvedIndex,
         }
       },
       navigation: {
