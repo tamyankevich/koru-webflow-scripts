@@ -30,8 +30,8 @@ function initCrispLoadingAnimation() {
   const holder = document.querySelector(".clean-screen-holder");
   const navOuter = document.querySelector(".nav-outer");
   const heading = container.querySelectorAll(".h1__hero");
-  // Hero subcopy: any [data-anim-by-words] that isn't the h1 or the featured-work client slot
-  const subcopy = container.querySelectorAll('[data-anim-by-words]:not(.h1__hero):not([data-fw-client-slot])');
+  // Hero subcopy: revealed line by line
+  const subcopy = container.querySelectorAll('[data-anim-by-lines]');
   const revealImages = container.querySelectorAll(".crisp-loader__group > *");
   const isScaleUp = container.querySelectorAll(".crisp-loader__media");
   const isScaleDown = container.querySelectorAll(".crisp-loader__media .is--scale-down");
