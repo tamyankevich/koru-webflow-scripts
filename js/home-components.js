@@ -342,11 +342,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     heroUpdateScrubber = updateScrubber;
 
-    // Set initial state immediately — silent so animateWords doesn't fire before the loader
-    swap(0, 0, true);
+    // Set initial state immediately — silent so animateWords doesn't fire before the loader.
+    // Desktop starts as if the cursor were at the vertical middle of the hero, so the slider
+    // opens on the middle work instead of the first. Mobile starts the draggable ball in the middle too.
+    var startRatio = 0.5;
+    (function () {
+      var total   = projects.reduce(function (a, p) { return a + p.images.length; }, 0);
+      var flatIdx = Math.min(Math.floor(startRatio * total), total - 1);
+      var count   = 0;
+      for (var i = 0; i < projects.length; i++) {
+        count += projects[i].images.length;
+        if (flatIdx < count) {
+          swap(i, flatIdx - (count - projects[i].images.length), true);
+          break;
+        }
+      }
+    })();
 
     if (!isMobileCheck) {
-      updateScrubber(0);
+      updateScrubber(startRatio);
       // ——— Desktop: cursor Y drives image swap ———
       document.addEventListener('mousemove', function (e) {
         handleY(e.clientY);
@@ -362,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var n          = scrubberBars.length;
       var sigma      = n * 0.18;
       var scrubberW  = scrubber.clientWidth;
-      var ballX      = 0; // current ball position 0..scrubberW
+      var ballX      = startRatio * scrubberW; // current ball position 0..scrubberW
       var dragStartX = 0;
       var dragStartBallX = 0;
 
@@ -406,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       // Set initial ball position and wave instantly
-      applyMobileBallX(0, true);
+      applyMobileBallX(ballX, true);
 
       var isDragging    = false;
       var velocity      = 0;  // px/ms
