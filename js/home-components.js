@@ -47,7 +47,7 @@ function initCrispLoadingAnimation() {
     const fwHeading = container.querySelector('.h4__featured-work');
     const fwTags    = container.querySelectorAll('.fw-tags__container > *');
     if (heading.length) animateWords(heading);
-    if (subcopy.length) animateWords(subcopy, null);
+    if (subcopy.length) animateLines(subcopy);
     if (fwHeading)  gsap.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out', delay: 0.1 });
     if (fwTags.length) gsap.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06, delay: 0.15 });
     return;
@@ -149,7 +149,7 @@ function initCrispLoadingAnimation() {
   }
 
   if (subcopy.length) {
-    animateWords(subcopy, tl, "<0.15");
+    animateLines(subcopy, tl, "<0.15");
   }
 
 
