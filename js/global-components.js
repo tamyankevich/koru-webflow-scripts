@@ -254,6 +254,53 @@ function animateWords(elements, tl, position) {
 }
 
 
+// ——— Reusable line reveal animation ———
+// Usage:
+//   animateLines(elements)              → creates its own tween, triggers immediately
+//   animateLines(elements, tl, "< 0.1") → appends to an existing timeline at the given position
+//
+// elements: a selector string, Element, or NodeList
+// Uses SplitText autoSplit, so lines re-split (and the reveal state is kept) on resize / font load.
+// Returns the SplitText instance so callers can reference split.lines / split.revert()
+
+function animateLines(elements, tl, position) {
+  const targets = typeof elements === 'string'
+    ? document.querySelectorAll(elements)
+    : elements;
+
+  if (!targets || (targets.length !== undefined && !targets.length)) return null;
+
+  const tweenVars = {
+    yPercent: 0,
+    stagger: 0.1,
+    ease: 'expo.out',
+    duration: 0.8
+  };
+
+  let played = false;
+  const split = SplitText.create(targets, {
+    type: 'lines',
+    mask: 'lines',
+    autoSplit: true,
+    onSplit(self) {
+      gsap.set(self.lines, { lineHeight: 'inherit' });
+      // Already revealed once: after a re-split, show lines in place with no replay
+      if (played) return gsap.set(self.lines, { yPercent: 0 });
+      gsap.set(self.lines, { yPercent: 110 });
+      played = true;
+      if (tl) {
+        // Timeline-driven: return nothing so the timeline owns playback
+        tl.to(self.lines, tweenVars, position);
+      } else {
+        return gsap.to(self.lines, tweenVars);
+      }
+    }
+  });
+
+  return split;
+}
+
+
 // -----------------------------------------
 // COLLECTIVE SWIPER
 // -----------------------------------------
