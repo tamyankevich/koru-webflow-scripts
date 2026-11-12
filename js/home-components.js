@@ -30,6 +30,8 @@ function initCrispLoadingAnimation() {
   const holder = document.querySelector(".clean-screen-holder");
   const navOuter = document.querySelector(".nav-outer");
   const heading = container.querySelectorAll(".h1__hero");
+  // Hero subcopy: any [data-anim-by-words] that isn't the h1 or the featured-work client slot
+  const subcopy = container.querySelectorAll('[data-anim-by-words]:not(.h1__hero):not([data-fw-client-slot])');
   const revealImages = container.querySelectorAll(".crisp-loader__group > *");
   const isScaleUp = container.querySelectorAll(".crisp-loader__media");
   const isScaleDown = container.querySelectorAll(".crisp-loader__media .is--scale-down");
@@ -45,6 +47,7 @@ function initCrispLoadingAnimation() {
     const fwHeading = container.querySelector('.h4__featured-work');
     const fwTags    = container.querySelectorAll('.fw-tags__container > *');
     if (heading.length) animateWords(heading);
+    if (subcopy.length) animateWords(subcopy, null);
     if (fwHeading)  gsap.from(fwHeading, { autoAlpha: 0, yPercent: 30, duration: 0.6, ease: 'power2.out', delay: 0.1 });
     if (fwTags.length) gsap.from(fwTags, { autoAlpha: 0, yPercent: 30, duration: 0.4, ease: 'power2.out', stagger: 0.06, delay: 0.15 });
     return;
@@ -143,6 +146,10 @@ function initCrispLoadingAnimation() {
 
   if (heading.length) {
     split = animateWords(heading, tl, "-=0.8");
+  }
+
+  if (subcopy.length) {
+    animateWords(subcopy, tl, "<0.15");
   }
 
 
